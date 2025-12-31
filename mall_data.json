@@ -1,0 +1,317 @@
+{
+  "mall_name": "Grand Plaza Shopping Mall",
+  "floors": 5,
+  "shops": [
+    {
+      "id": 1,
+      "name": "Fashion Forward",
+      "category": "Fashion",
+      "floor": 1,
+      "description": "Trendy clothing and accessories for men and women",
+      "hours": "10:00 AM - 9:00 PM",
+      "price_range": "$$-$$$"
+    },
+    {
+      "id": 2,
+      "name": "Tech Haven",
+      "category": "Electronics",
+      "floor": 2,
+      "description": "Latest smartphones, laptops, and gadgets",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$$$-$$$$"
+    },
+    {
+      "id": 3,
+      "name": "Food Court Central",
+      "category": "Food",
+      "floor": 3,
+      "description": "Multi-cuisine food court with 15+ options",
+      "hours": "11:00 AM - 10:00 PM",
+      "price_range": "$-$$"
+    },
+    {
+      "id": 4,
+      "name": "HealthPlus Pharmacy",
+      "category": "Health",
+      "floor": 1,
+      "description": "Prescription medicines and health products",
+      "hours": "9:00 AM - 9:00 PM",
+      "price_range": "$-$$"
+    },
+    {
+      "id": 5,
+      "name": "Book Nook",
+      "category": "Books",
+      "floor": 2,
+      "description": "Books, magazines, and premium stationery",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$-$$"
+    },
+    {
+      "id": 6,
+      "name": "Sports Arena",
+      "category": "Sports",
+      "floor": 4,
+      "description": "Sports equipment, activewear, and fitness gear",
+      "hours": "10:00 AM - 9:00 PM",
+      "price_range": "$$-$$$"
+    },
+    {
+      "id": 7,
+      "name": "Kids Kingdom",
+      "category": "Toys",
+      "floor": 4,
+      "description": "Educational toys, games, and children's items",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$-$$$"
+    },
+    {
+      "id": 8,
+      "name": "Cinema Complex",
+      "category": "Entertainment",
+      "floor": 5,
+      "description": "8-screen multiplex with IMAX and 4DX",
+      "hours": "12:00 PM - 11:00 PM",
+      "price_range": "$$"
+    },
+    {
+      "id": 9,
+      "name": "Home Decor Studio",
+      "category": "Home",
+      "floor": 3,
+      "description": "Furniture, furnishings, and home accessories",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$$-$$$$"
+    },
+    {
+      "id": 10,
+      "name": "Beauty Bliss",
+      "category": "Beauty",
+      "floor": 1,
+      "description": "Cosmetics, skincare, and beauty services",
+      "hours": "10:00 AM - 9:00 PM",
+      "price_range": "$$-$$$"
+    },
+    {
+      "id": 11,
+      "name": "Jewelry Junction",
+      "category": "Jewelry",
+      "floor": 2,
+      "description": "Fine jewelry in gold, silver, and diamonds",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$$$-$$$$"
+    },
+    {
+      "id": 12,
+      "name": "Shoe Palace",
+      "category": "Footwear",
+      "floor": 1,
+      "description": "Designer and casual footwear for all ages",
+      "hours": "10:00 AM - 9:00 PM",
+      "price_range": "$-$$$"
+    },
+    {
+      "id": 13,
+      "name": "Coffee Corner",
+      "category": "Food",
+      "floor": 2,
+      "description": "Artisan coffee, pastries, and light snacks",
+      "hours": "8:00 AM - 10:00 PM",
+      "price_range": "$-$$"
+    },
+    {
+      "id": 14,
+      "name": "Pet Paradise",
+      "category": "Pets",
+      "floor": 4,
+      "description": "Pet supplies, food, and accessories",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$-$$"
+    },
+    {
+      "id": 15,
+      "name": "Fitness First",
+      "category": "Fitness",
+      "floor": 5,
+      "description": "Premium gym and fitness center",
+      "hours": "6:00 AM - 10:00 PM",
+      "price_range": "$$$"
+    },
+    {
+      "id": 16,
+      "name": "Gourmet Bistro",
+      "category": "Food",
+      "floor": 5,
+      "description": "Fine dining restaurant with city views",
+      "hours": "12:00 PM - 11:00 PM",
+      "price_range": "$$$-$$$$"
+    },
+    {
+      "id": 17,
+      "name": "Toy Express",
+      "category": "Toys",
+      "floor": 3,
+      "description": "Action figures, board games, and collectibles",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$-$$"
+    },
+    {
+      "id": 18,
+      "name": "Music World",
+      "category": "Music",
+      "floor": 2,
+      "description": "Musical instruments and accessories",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$$-$$$$"
+    },
+    {
+      "id": 19,
+      "name": "Art Gallery & Supplies",
+      "category": "Art",
+      "floor": 3,
+      "description": "Art supplies, paintings, and craft materials",
+      "hours": "10:00 AM - 7:00 PM",
+      "price_range": "$-$$$"
+    },
+    {
+      "id": 20,
+      "name": "Optical World",
+      "category": "Health",
+      "floor": 1,
+      "description": "Eyeglasses, sunglasses, and eye care",
+      "hours": "10:00 AM - 8:00 PM",
+      "price_range": "$$-$$$"
+    }
+  ],
+  "floor_info": {
+    "1": "Ground Floor - Fashion, Health & Beauty",
+    "2": "First Floor - Electronics, Books & Jewelry",
+    "3": "Second Floor - Food, Home Decor & Art",
+    "4": "Third Floor - Sports, Toys & Pets",
+    "5": "Fourth Floor - Entertainment & Dining"
+  },
+  "amenities": {
+    "elevators": [1, 2, 3],
+    "escalators": "All floors",
+    "restrooms": "All floors",
+    "parking": "Basement levels B1-B3",
+    "info_desk": "Ground Floor (Floor 1)"
+  },
+  "accessibility": {
+    "wheelchair_accessible": true,
+    "accessible_parking_spaces": 50,
+    "accessible_elevators": [1, 2, 3],
+    "accessible_restrooms": "All floors",
+    "service_animals_welcome": true,
+    "accessibility_coordinator": "Available at Info Desk",
+    "wide_aisles_floors": [1, 2, 3],
+    "braille_signage": true,
+    "audio_announcements": true
+  },
+  "current_events": [
+    {
+      "id": 1,
+      "name": "Holiday Shopping Festival",
+      "type": "promotion",
+      "location": "All Floors",
+      "dates": "Dec 1 - Dec 31, 2025",
+      "description": "Up to 50% off at participating stores",
+      "featured_shops": ["Fashion Forward", "Tech Haven", "Jewelry Junction"],
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Kids Play Area",
+      "type": "facility",
+      "location": "Floor 4, Near Kids Kingdom",
+      "schedule": "Daily 10:00 AM - 8:00 PM",
+      "description": "Free supervised play area for children ages 3-10",
+      "cost": "Free",
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Live Music Weekend",
+      "type": "entertainment",
+      "location": "Floor 3, Central Atrium",
+      "schedule": "Saturdays & Sundays, 2:00 PM - 5:00 PM",
+      "description": "Local artists performing live music",
+      "cost": "Free",
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Dining Rewards Program",
+      "type": "promotion",
+      "location": "All food outlets",
+      "description": "Spend $50+ at any restaurant, get $10 voucher for next visit",
+      "valid_until": "Dec 31, 2025",
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "New Year's Eve Celebration",
+      "type": "event",
+      "location": "Floor 5, Rooftop Terrace",
+      "date": "Dec 31, 2025 8:00 PM - 1:00 AM",
+      "description": "Countdown party with live DJ, fireworks display, and complimentary champagne toast",
+      "cost": "Free entry (reservations recommended)",
+      "active": true
+    }
+  ],
+  "facilities": {
+    "restrooms": [
+      {"floor": 1, "location": "Near Food Court entrance", "accessible": true, "family_room": true},
+      {"floor": 2, "location": "Near Cinema Complex", "accessible": true, "family_room": false},
+      {"floor": 3, "location": "East Wing, near Art Gallery", "accessible": true, "family_room": true},
+      {"floor": 4, "location": "West Wing, near Sports Arena", "accessible": false, "family_room": false},
+      {"floor": 5, "location": "Near Fitness First", "accessible": true, "family_room": false}
+    ],
+    "nursing_rooms": [
+      {
+        "floor": 1,
+        "location": "Near Customer Service desk",
+        "features": ["Changing station", "Comfortable seating", "Privacy lock", "Sink", "Microwave"],
+        "accessible": true
+      },
+      {
+        "floor": 3,
+        "location": "Near Family Play Area",
+        "features": ["Changing station", "Comfortable seating", "Privacy lock", "Refrigerator"],
+        "accessible": true
+      }
+    ],
+    "atms": [
+      {"floor": 1, "location": "Main Entrance lobby", "bank": "Universal Bank", "accessible": true},
+      {"floor": 3, "location": "Food Court Central", "bank": "City Bank", "accessible": true}
+    ],
+    "info_desks": [
+      {"floor": 1, "location": "Main Entrance", "hours": "9:00 AM - 9:00 PM", "services": ["Lost & Found", "Gift cards", "Accessibility assistance", "General inquiries"]}
+    ],
+    "charging_stations": [
+      {"floor": 2, "location": "Near Book Nook", "type": "Phone charging locker"},
+      {"floor": 3, "location": "Food Court seating area", "type": "USB charging ports"}
+    ],
+    "water_fountains": [1, 2, 3, 4, 5],
+    "first_aid": {"floor": 1, "location": "Behind Customer Service", "hours": "Mall operating hours"}
+  },
+  "parking": {
+    "levels": ["B1", "B2", "B3"],
+    "total_spaces": 800,
+    "accessible_spaces": 50,
+    "ev_charging_stations": {
+      "location": "B1 Level",
+      "total": 10,
+      "type": "Level 2 and DC Fast Charging"
+    },
+    "hourly_rate": "$3 per hour",
+    "daily_max": "$20",
+    "validation": "Available with $30 purchase"
+  },
+  "mall_hours": {
+    "monday_thursday": "10:00 AM - 9:00 PM",
+    "friday_saturday": "10:00 AM - 10:00 PM",
+    "sunday": "11:00 AM - 8:00 PM",
+    "holidays": "Varies - check website"
+  }
+}
