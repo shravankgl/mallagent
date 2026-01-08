@@ -7,10 +7,11 @@ Converts raw text into structured cognitive representations using:
 - Constraint parsing
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Dict, Optional
 from anthropic import AsyncAnthropic
 import json
+from layer_logger import LayerLogger
 
 
 # Pydantic Models for Input/Output
@@ -27,6 +28,14 @@ class Entity(BaseModel):
     value: str = Field(..., description="Entity value")
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
+    @field_validator('value', mode='before')
+    @classmethod
+    def coerce_value_to_string(cls, v):
+        """Auto-convert any value to string for LLM flexibility."""
+        if v is None:
+            return ""
+        return str(v)
+
 
 class Constraints(BaseModel):
     """User constraints and preferences."""
@@ -35,6 +44,23 @@ class Constraints(BaseModel):
     preferred_floors: List[int] = Field(default_factory=list)
     accessibility_required: bool = False
     dietary_restrictions: List[str] = Field(default_factory=list)
+
+    @field_validator('dietary_restrictions', 'preferred_floors', mode='before')
+    @classmethod
+    def coerce_to_list(cls, v):
+        """Auto-convert non-list values to lists for LLM flexibility."""
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            # If it's a comma-separated string, split it
+            if ',' in v:
+                return [item.strip() for item in v.split(',')]
+            # Otherwise, single-item list
+            return [v] if v else []
+        # For other types (int, etc.), wrap in list
+        return [v]
 
 
 class PerceptionResult(BaseModel):
@@ -98,7 +124,18 @@ Confidence scale:
         Returns:
             PerceptionResult with intent, entities, constraints
         """
+        # Log layer start
+        LayerLogger.log_layer_start("Perception", 1)
+
+        # Log input
+        LayerLogger.log_input({
+            "user_query": user_query,
+            "user_profile": user_profile or {}
+        }, "Input")
+
         try:
+            LayerLogger.log_processing("Building perception prompt with user context")
+
             # Add user profile context to query
             context_prompt = self.PERCEPTION_PROMPT
             if user_profile:
@@ -108,6 +145,9 @@ Confidence scale:
                 context_prompt += f"- Preferred categories: {', '.join(user_profile.get('preferred_categories', []))}\n"
                 context_prompt += f"- Dietary restrictions: {', '.join(user_profile.get('dietary_restrictions', []))}\n"
 
+            # Log LLM call
+            LayerLogger.log_llm_call("claude-haiku-4-5-20251001", context_prompt)
+
             # Call Claude API
             message = await self.client.messages.create(
                 model="claude-haiku-4-5-20251001",
@@ -115,6 +155,8 @@ Confidence scale:
                 system=context_prompt,
                 messages=[{"role": "user", "content": user_query}]
             )
+
+            LayerLogger.log_processing("Parsing LLM response into structured format")
 
             # Parse response
             response_text = message.content[0].text.strip()
@@ -133,7 +175,7 @@ Confidence scale:
 
             constraints = Constraints(**(data.get("constraints", {})))
 
-            return PerceptionResult(
+            result = PerceptionResult(
                 intent=intent,
                 entities=entities,
                 constraints=constraints,
@@ -142,8 +184,13 @@ Confidence scale:
                 user_preferences_activated=list(user_profile.keys()) if user_profile else []
             )
 
+            # Log output
+            LayerLogger.log_output(result, "Perception Output")
+
+            return result
+
         except Exception as e:
-            print(f"Perception error: {e}, using fallback")
+            LayerLogger.log_fallback("Perception", str(e))
             return self._keyword_fallback(user_query)
 
     def _keyword_fallback(self, user_query: str) -> PerceptionResult:

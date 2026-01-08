@@ -10,6 +10,7 @@ Stores:
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
 from datetime import datetime
+from layer_logger import LayerLogger
 
 
 # Pydantic Models
@@ -38,11 +39,15 @@ class MemoryManager:
 
     def set_preferences(self, preferences: Dict[str, Any]):
         """Store user preferences collected at startup."""
+        LayerLogger.log_layer_start("Memory - Storing Preferences", 2)
+        LayerLogger.log_input(preferences, "User Preferences")
         self.user_preferences = UserPreferences(**preferences)
+        LayerLogger.log_processing(f"Preferences stored for session")
 
     def get_preferences_dict(self) -> Dict[str, Any]:
         """Get preferences as dictionary."""
         if self.user_preferences:
+            LayerLogger.log_processing("Retrieving user preferences from memory")
             return self.user_preferences.dict()
         return {}
 
@@ -51,6 +56,7 @@ class MemoryManager:
         self.conversation_history.append(
             Message(role=role, content=content)
         )
+        LayerLogger.log_processing(f"Stored {role} message (total: {len(self.conversation_history)} messages)")
 
     def get_recent_context(self, n: int = 5) -> List[Message]:
         """Get last n messages."""

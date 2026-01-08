@@ -13,6 +13,7 @@ from typing import List, Dict, Optional, Any
 from perception import PerceptionResult
 from anthropic import AsyncAnthropic
 import json
+from layer_logger import LayerLogger
 
 
 # Pydantic Models
@@ -97,7 +98,18 @@ Output JSON:
         Returns:
             DecisionPlan with reasoning and tool calls
         """
+        # Log layer start
+        LayerLogger.log_layer_start("Decision", 3)
+
+        # Log input
+        LayerLogger.log_input({
+            "perception": perception.dict(),
+            "user_profile": user_profile
+        }, "Decision Input")
+
         try:
+            LayerLogger.log_processing("Building decision context from perception and user profile")
+
             # Build context
             context = f"""
 Perception:
@@ -113,6 +125,9 @@ User Profile:
 - Dietary: {user_profile.get('dietary_restrictions')}
 """
 
+            # Log LLM call
+            LayerLogger.log_llm_call("claude-sonnet-4-5-20250929", self.DECISION_PROMPT)
+
             # Call Claude
             message = await self.client.messages.create(
                 model="claude-sonnet-4-5-20250929",  # Sonnet for reasoning
@@ -120,6 +135,8 @@ User Profile:
                 system=self.DECISION_PROMPT,
                 messages=[{"role": "user", "content": context}]
             )
+
+            LayerLogger.log_processing("Parsing LLM response into DecisionPlan")
 
             # Parse
             response_text = message.content[0].text.strip()
@@ -130,15 +147,25 @@ User Profile:
             reasoning_steps = [ReasoningStep(**step) for step in data.get("reasoning_steps", [])]
             tool_calls = [ToolCall(**tool) for tool in data.get("tool_calls", [])]
 
-            return DecisionPlan(
+            plan = DecisionPlan(
                 reasoning_steps=reasoning_steps,
                 tool_calls=tool_calls,
                 final_answer=data.get("final_answer"),
                 verification_needed=data.get("verification_needed", False)
             )
 
+            # Log output
+            LayerLogger.log_output(plan, "Decision Plan")
+            LayerLogger.log_summary("Decision Summary", [
+                f"Reasoning steps: {len(reasoning_steps)}",
+                f"Tool calls planned: {len(tool_calls)}",
+                f"Tools: {', '.join([tc.tool_name for tc in tool_calls])}"
+            ])
+
+            return plan
+
         except Exception as e:
-            print(f"Decision error: {e}, using fallback")
+            LayerLogger.log_fallback("Decision", str(e))
             return self._simple_fallback(perception)
 
     def _simple_fallback(self, perception: PerceptionResult) -> DecisionPlan:

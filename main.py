@@ -16,6 +16,7 @@ Assignment Requirements:
 """
 
 import os
+import sys
 import asyncio
 from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
@@ -173,35 +174,22 @@ async def cognitive_loop(
     user_profile = memory.get_preferences_dict()
 
     # LAYER 1: PERCEPTION - Understand user intent
-    console.print("\n[dim]→ Layer 1: Perception (Understanding intent)...[/dim]")
     perception_result: PerceptionResult = await perception.perceive(user_query, user_profile)
 
-    console.print(f"[cyan]  Intent: {perception_result.intent.primary_goal} "
-                  f"(confidence: {perception_result.intent.confidence:.2f})[/cyan]")
-
     # LAYER 2: MEMORY - Store conversation and retrieve context
-    console.print("[dim]→ Layer 2: Memory (Recording interaction)...[/dim]")
     memory.add_message("user", user_query)
 
     # Get recent context
     recent_context = memory.get_context_string()
 
     # LAYER 3: DECISION - Plan actions
-    console.print("[dim]→ Layer 3: Decision (Planning actions)...[/dim]")
     decision_plan: DecisionPlan = await decision.decide(perception_result, user_profile)
 
-    console.print(f"[yellow]  Planned {len(decision_plan.tool_calls)} tool calls[/yellow]")
-    for tool_call in decision_plan.tool_calls:
-        console.print(f"[yellow]    - {tool_call.tool_name}[/yellow]")
-
     # LAYER 4: ACTION - Execute tools and synthesize response
-    console.print("[dim]→ Layer 4: Action (Executing tools)...[/dim]")
     action_result: ActionResult = await action.execute(decision_plan)
 
     # Store assistant response
     memory.add_message("assistant", action_result.final_response)
-
-    console.print(f"[green]  ✓ Action complete (success: {action_result.success})[/green]")
 
     return action_result.final_response
 
@@ -228,7 +216,7 @@ async def main():
         # Initialize MCP tools server
         console.print("\n[bold yellow]Step 2: Connecting to MCP Tools Server[/bold yellow]")
         server_params = StdioServerParameters(
-            command="python",
+            command=sys.executable,  # Use the same Python that's running this script
             args=["mall_tools.py"]
         )
 

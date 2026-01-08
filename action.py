@@ -13,6 +13,8 @@ from typing import List, Dict, Optional, Any
 from decision import DecisionPlan
 from mcp import ClientSession
 import asyncio
+import json
+from layer_logger import LayerLogger
 
 
 # Pydantic Models
@@ -48,6 +50,12 @@ class ActionExecutor:
         Returns:
             ActionResult with tool results and response
         """
+        # Log layer start
+        LayerLogger.log_layer_start("Action", 4)
+
+        # Log input
+        LayerLogger.log_input(plan, "Action Plan")
+
         tool_results = []
         reasoning_trace = []
 
@@ -55,23 +63,42 @@ class ActionExecutor:
         for step in plan.reasoning_steps:
             reasoning_trace.append(f"[{step.type}] {step.description}")
 
+        LayerLogger.log_summary("Reasoning Steps", reasoning_trace)
+
         # Execute tool calls
+        LayerLogger.log_processing(f"Executing {len(plan.tool_calls)} tool calls")
+
         for tool_call in plan.tool_calls:
+            LayerLogger.log_tool_call(tool_call.tool_name, tool_call.arguments)
+
             result = await self._execute_tool(tool_call.tool_name, tool_call.arguments)
             tool_results.append(result)
+
+            LayerLogger.log_tool_result(tool_call.tool_name, result.success, result.execution_time_ms)
 
             if not result.success:
                 reasoning_trace.append(f"⚠️ {tool_call.tool_name} failed: {result.error}")
 
         # Synthesize response
+        LayerLogger.log_processing("Synthesizing human-readable response from tool results")
+
         final_response = self._synthesize_response(plan, tool_results)
 
-        return ActionResult(
+        action_result = ActionResult(
             tool_results=tool_results,
             final_response=final_response,
             reasoning_trace=reasoning_trace,
             success=all(r.success for r in tool_results)
         )
+
+        # Log output
+        LayerLogger.log_output({
+            "success": action_result.success,
+            "tools_executed": len(tool_results),
+            "response_preview": final_response[:200] + "..." if len(final_response) > 200 else final_response
+        }, "Action Result")
+
+        return action_result
 
     async def _execute_tool(self, tool_name: str, arguments: Dict) -> ToolResult:
         """Execute single MCP tool.
@@ -109,6 +136,28 @@ class ActionExecutor:
                 execution_time_ms=execution_time
             )
 
+    def _extract_text_from_content(self, content_list) -> str:
+        """Extract text from MCP TextContent list.
+
+        Args:
+            content_list: List of TextContent objects from MCP
+
+        Returns:
+            Extracted text string
+        """
+        if not content_list:
+            return ""
+
+        # MCP returns list of TextContent objects
+        if isinstance(content_list, list) and len(content_list) > 0:
+            # Access the text attribute of first TextContent
+            first_item = content_list[0]
+            if hasattr(first_item, 'text'):
+                return first_item.text
+
+        # Fallback
+        return str(content_list)
+
     def _synthesize_response(
         self,
         plan: DecisionPlan,
@@ -133,23 +182,114 @@ class ActionExecutor:
         if not successful_results:
             return "I apologize, but I encountered an error processing your request. Could you rephrase?"
 
-        # Extract data from search_shops
+        # Process each tool result
         for result in successful_results:
             if result.tool_name == "search_shops" and result.data:
-                # Parse shop results
-                shops_text = str(result.data)
+                # Extract text from TextContent
+                raw_text = self._extract_text_from_content(result.data)
 
-                # Simple extraction (in real implementation, parse JSON)
-                return f"I found the following options for you:\n\n{shops_text}\n\nWould you like more details about any of these?"
+                try:
+                    # Parse JSON shop data
+                    shops = json.loads(raw_text)
+
+                    # Format human-readable response
+                    if not shops:
+                        return "I couldn't find any shops matching your criteria. Would you like to adjust your search?"
+
+                    response_parts = ["I found the following options for you:\n"]
+
+                    for i, shop in enumerate(shops[:5], 1):  # Limit to 5 shops
+                        response_parts.append(
+                            f"{i}. **{shop['name']}** ({shop['category']}) - Floor {shop['floor']}\n"
+                            f"   {shop['description']}\n"
+                            f"   Price range: {shop.get('price_range', 'N/A')}"
+                        )
+
+                        # Add rating if available
+                        if 'rating' in shop:
+                            response_parts[-1] += f" | Rating: {shop['rating']}/5.0"
+
+                        response_parts[-1] += "\n"
+
+                    if len(shops) > 5:
+                        response_parts.append(f"\n...and {len(shops) - 5} more options available.")
+
+                    response_parts.append("\nWould you like more details about any specific shop?")
+                    return "\n".join(response_parts)
+
+                except json.JSONDecodeError:
+                    # Fallback if JSON parsing fails
+                    return f"I found some options:\n\n{raw_text}\n\nWould you like more details?"
 
             elif result.tool_name == "get_shop_details" and result.data:
-                return f"Here are the details:\n\n{result.data}"
+                raw_text = self._extract_text_from_content(result.data)
+
+                try:
+                    shop = json.loads(raw_text)
+                    response = f"**{shop['name']}**\n"
+                    response += f"📍 Location: Floor {shop['floor']}\n"
+
+                    if 'hours' in shop:
+                        response += f"🕐 Hours: {shop['hours']}\n"
+                    if 'price_range' in shop:
+                        response += f"💰 Price Range: {shop['price_range']}\n"
+                    if 'rating' in shop:
+                        response += f"⭐ Rating: {shop['rating']}/5.0\n"
+
+                    response += f"\n{shop.get('description', '')}\n"
+
+                    if 'specialties' in shop and shop['specialties']:
+                        response += f"\nSpecialties: {', '.join(shop['specialties'])}"
+
+                    return response
+                except json.JSONDecodeError:
+                    return f"Here are the details:\n\n{raw_text}"
 
             elif result.tool_name == "calculate_route" and result.data:
-                return f"I've calculated an efficient route for you:\n\n{result.data}"
+                raw_text = self._extract_text_from_content(result.data)
+
+                try:
+                    route = json.loads(raw_text)
+                    response_parts = ["I've planned an efficient route for you:\n"]
+
+                    total_time = route.get('total_time_minutes', 0)
+                    total_distance = route.get('total_distance_meters', 0)
+
+                    response_parts.append(f"⏱️  Estimated time: {total_time} minutes")
+                    response_parts.append(f"📏 Total distance: {total_distance}m\n")
+                    response_parts.append("Route:")
+
+                    for i, stop in enumerate(route.get('stops', []), 1):
+                        response_parts.append(f"{i}. {stop.get('shop_name', 'Unknown')} (Floor {stop.get('floor', '?')})")
+
+                    return "\n".join(response_parts)
+                except json.JSONDecodeError:
+                    return f"Here's your route:\n\n{raw_text}"
 
             elif result.tool_name == "get_mall_facilities" and result.data:
-                return f"Mall facilities:\n\n{result.data}"
+                raw_text = self._extract_text_from_content(result.data)
+                return f"Mall Facilities:\n\n{raw_text}"
+
+            elif result.tool_name == "get_recommendations" and result.data:
+                raw_text = self._extract_text_from_content(result.data)
+
+                try:
+                    recommendations = json.loads(raw_text)
+                    if isinstance(recommendations, list):
+                        response_parts = ["Here are my personalized recommendations for you:\n"]
+
+                        for i, shop in enumerate(recommendations[:5], 1):
+                            response_parts.append(
+                                f"{i}. **{shop['name']}** ({shop.get('category', 'N/A')}) - Floor {shop.get('floor', '?')}\n"
+                                f"   {shop.get('description', '')}\n"
+                                f"   {shop.get('recommendation_reason', '')}\n"
+                            )
+
+                        return "\n".join(response_parts)
+                except json.JSONDecodeError:
+                    pass
+
+                return f"Recommendations:\n\n{raw_text}"
 
         return "I've processed your request. How else can I help?"
 
