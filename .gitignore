@@ -2,3 +2,5 @@
 .venv
 .python-version
 docs
+__pycache__/
+*.pyc
